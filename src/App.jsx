@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import "./App.css";
 import { FcTodoList } from "react-icons/fc";
 import { FaTrash } from "react-icons/fa6";
@@ -7,11 +7,14 @@ import { MdDone } from "react-icons/md";
 import { v4 as uuidv4 } from "uuid";
 import { list } from "postcss";
 import { MdRemoveDone } from "react-icons/md";
+import { motion } from "framer-motion";
 
 function App() {
-  const [value, setValue] = useState();
+  const [value, setValue] = useState("");
   const [toDoList, setToDoList] = useState([]);
   const [editItemId, setEditItemId] = useState(0);
+  let menu = useRef();
+  const [option, setOption] = useState("All");
 
   const addToDoList = () => {
     let newItem = {
@@ -69,7 +72,13 @@ function App() {
           Remaining Task:{" "}
           {toDoList.filter((item) => item.status === "Active").length}
         </h2>
-        <select className="outline-none" name="" id="">
+        <select
+          className="outline-none"
+          onClick={() => setOption(menu.current.value)}
+          ref={(input) => (menu.current = input)}
+          name=""
+          id=""
+        >
           <option value="All">All</option>
           <option value="Active">Active</option>
           <option value="Resolved">Resolved</option>
@@ -94,37 +103,44 @@ function App() {
         <div>
           <ul>
             {toDoList.map((list) => (
-              <li
-                key={list.id}
-                className={`flex items-center mb-2 p-1 w-[380px] justify-between border-b rounded-md p-1 ${
-                  list.status === "Resolved" ? "bg-green-400" : ""
-                }`}
-              >
-                <p>{list.item}</p>
-                <span className="flex w-[80px] justify-between items-center">
-                  <MdEdit
-                    onClick={() => editList(list)}
-                    className="text-[20px] cursor-pointer"
-                  />
-                  <FaTrash
-                    onClick={() => removeFromList(list.id)}
-                    className="text-[20px] cursor-pointer"
-                  />
+              <>
+                {(list.status === option || option === "All") && (
+                  <motion.li
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring" }}
+                    key={list.id}
+                    className={`flex items-center mb-2 p-1 w-[380px] justify-between border-b rounded-md p-1 ${
+                      list.status === "Resolved" ? "bg-green-400" : ""
+                    }`}
+                  >
+                    <p>{list.item}</p>
+                    <span className="flex w-[80px] justify-between items-center">
+                      <MdEdit
+                        onClick={() => editList(list)}
+                        className="text-[20px] cursor-pointer"
+                      />
+                      <FaTrash
+                        onClick={() => removeFromList(list.id)}
+                        className="text-[20px] cursor-pointer"
+                      />
 
-                  {list.status === "Active" && (
-                    <MdDone
-                      onClick={() => stateChange(list.id)}
-                      className="text-[25px] cursor-pointer"
-                    />
-                  )}
-                  {list.status === "Resolved" && (
-                    <MdRemoveDone
-                      onClick={() => stateChange(list.id)}
-                      className="text-[25px] cursor-pointer"
-                    />
-                  )}
-                </span>
-              </li>
+                      {list.status === "Active" && (
+                        <MdDone
+                          onClick={() => stateChange(list.id)}
+                          className="text-[25px] cursor-pointer"
+                        />
+                      )}
+                      {list.status === "Resolved" && (
+                        <MdRemoveDone
+                          onClick={() => stateChange(list.id)}
+                          className="text-[25px] cursor-pointer"
+                        />
+                      )}
+                    </span>
+                  </motion.li>
+                )}
+              </>
             ))}
           </ul>
         </div>
